@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Neon Rush // Rhythm Platformer</title>
+  <style>
+    :root {
+      --bg: #070a16;
+      --text: #e6f4ff;
+      --panel: rgba(17, 27, 58, 0.78);
+      --accent: #00e7ff;
+      --accent2: #ff4ec9;
+      --ok: #6affaa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 20% 15%, #132451, #040710 58%);
+      color: var(--text);
+      font-family: Inter, Segoe UI, Roboto, system-ui, sans-serif;
+      min-height: 100dvh;
+    }
+    #app { max-width: 1200px; margin: 0 auto; padding: 14px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .logo { margin: 0; letter-spacing: .2em; color: var(--accent); text-shadow: 0 0 14px #00e7ff90; animation: logoPulse 2.4s infinite; }
+    .subtitle { margin: 0; opacity: .8; }
+    .top-stats { text-align: right; font-size: .9rem; }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid #7ab4ff44;
+      border-radius: 18px;
+      box-shadow: 0 18px 46px #000a;
+      backdrop-filter: blur(6px);
+    }
+    .hero { margin-top: 14px; padding: 22px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .btn {
+      background: #1c2a5a;
+      border: 1px solid #8abaff55;
+      color: var(--text);
+      border-radius: 11px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: transform .08s, box-shadow .2s;
+      font-weight: 600;
+    }
+    .btn:hover { box-shadow: 0 0 16px #00e7ff55; }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary {
+      color: #071022;
+      background: linear-gradient(90deg, var(--accent), #6ba2ff);
+      font-weight: 800;
+    }
+    .level-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+    .level-card { padding: 14px; }
+    .level-card.locked { opacity: .45; filter: grayscale(.6); }
+
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .78rem; font-weight: 800; }
+    .diff-easy { background: #48d77f26; color: #89ffc0; }
+    .diff-normal { background: #58b9ff26; color: #9addff; }
+    .diff-hard { background: #ffb06026; color: #ffd0a4; }
+    .diff-harder { background: #ff747426; color: #ffb1b1; }
+    .diff-insane { background: #bf79ff26; color: #deb4ff; }
+    .diff-demon { background: #ff4ec926; color: #ff98e6; }
+
+    .game-screen { position: relative; }
+    .hud { margin: 8px 4px; display: flex; justify-content: space-between; gap: 8px; font-weight: 700; }
+    #gameCanvas {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 16px;
+      border: 1px solid #7ea8ff44;
+      box-shadow: 0 18px 42px #000b;
+      background: #090f22;
+    }
+    .overlay { display: none; position: fixed; inset: 0; padding: 20px; background: #030612cf; z-index: 10; }
+    .overlay.active { display: grid; place-items: center; }
+    .modal { width: min(100%, 520px); padding: 20px; }
+
+    .progress { margin-top: 8px; height: 8px; border-radius: 999px; background: #18295a; overflow: hidden; }
+    .progress > span { display: block; height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); }
+    .mobile-controls { display: none; margin-top: 8px; }
+    .mobile-controls button { width: 100%; border-radius: 12px; padding: 14px; font-weight: 800; background: #21366a; color: #fff; border: 1px solid #94c2ff66; }
+
+    @keyframes logoPulse { 50% { text-shadow: 0 0 26px #00e7ffed; } }
+    @media (max-width: 850px) {
+      #app { padding: 10px; }
+      .topbar { flex-direction: column; align-items: flex-start; }
+      .mobile-controls { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div>
+        <h1 class="logo">NEON RUSH</h1>
+        <p class="subtitle">Rhythm. Reflex. Repeat.</p>
+      </div>
+      <div id="topStats" class="top-stats"></div>
+    </header>
+
+    <main>
+      <section id="screen-main" class="screen active">
+        <div class="card hero">
+          <h2>Precision Rhythm Platformer</h2>
+          <p>One-touch controls, instant restarts, handcrafted levels, and high replay value.</p>
+          <div class="actions">
+            <button data-nav="levels" class="btn primary">Play</button>
+            <button data-nav="stats" class="btn">Stats</button>
+            <button data-nav="settings" class="btn">Settings</button>
+            <button data-nav="credits" class="btn">Credits</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-levels" class="screen"></section>
+      <section id="screen-stats" class="screen"></section>
+      <section id="screen-settings" class="screen"></section>
+      <section id="screen-credits" class="screen"></section>
+
+      <section id="screen-game" class="screen game-screen">
+        <div class="hud">
+          <div><strong id="hudLevel"></strong> <span id="hudMode"></span></div>
+          <div id="hudProgress">0%</div>
+          <div id="hudCoins">◈ 0/3</div>
+        </div>
+        <canvas id="gameCanvas" width="1280" height="720"></canvas>
+        <div class="mobile-controls"><button id="tapBtn">TAP / HOLD</button></div>
+      </section>
+
+      <section id="screen-pause" class="overlay">
+        <div class="card modal">
+          <h2>Paused</h2>
+          <div class="actions">
+            <button id="resumeBtn" class="btn primary">Resume</button>
+            <button id="restartBtn" class="btn">Restart</button>
+            <button id="pauseMenuBtn" class="btn">Level Select</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-complete" class="overlay">
+        <div class="card modal">
+          <h2 id="completeTitle">Level Complete</h2>
+          <p id="completeMeta"></p>
+          <div id="completeBadges" class="actions"></div>
+          <div class="actions">
+            <button id="nextLevelBtn" class="btn primary">Next Level</button>
+            <button id="replayLevelBtn" class="btn">Replay</button>
+            <button id="completeMenuBtn" class="btn">Level Select</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
