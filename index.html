@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Neon Rush // Rhythm Platformer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="logo-wrap">
+        <h1 class="logo">NEON RUSH</h1>
+        <p class="subtitle">Rhythm. Reflex. Repeat.</p>
+      </div>
+      <div id="topStats" class="top-stats"></div>
+    </header>
+
+    <main>
+      <section id="screen-main" class="screen active">
+        <div class="card hero">
+          <h2>Arcade Platformer</h2>
+          <p>Auto-run through handcrafted, beat-synced neon levels.</p>
+          <div class="actions">
+            <button data-nav="levels" class="btn primary">Play</button>
+            <button data-nav="stats" class="btn">Stats</button>
+            <button data-nav="settings" class="btn">Settings</button>
+            <button data-nav="credits" class="btn">Credits</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-levels" class="screen"></section>
+      <section id="screen-stats" class="screen"></section>
+      <section id="screen-settings" class="screen"></section>
+      <section id="screen-credits" class="screen"></section>
+
+      <section id="screen-game" class="screen game-screen">
+        <div class="hud">
+          <div><strong id="hudLevel">Level</strong> <span id="hudMode">Normal</span></div>
+          <div id="hudProgress">0%</div>
+          <div id="hudCoins">◈ 0/3</div>
+        </div>
+        <canvas id="gameCanvas" width="1280" height="720"></canvas>
+        <div id="mobileControls" class="mobile-controls">
+          <button id="tapBtn">TAP / HOLD</button>
+        </div>
+      </section>
+
+      <section id="screen-pause" class="overlay">
+        <div class="card modal">
+          <h2>Paused</h2>
+          <div class="actions">
+            <button id="resumeBtn" class="btn primary">Resume</button>
+            <button id="restartBtn" class="btn">Restart</button>
+            <button id="pauseMenuBtn" class="btn">Level Select</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-complete" class="overlay">
+        <div class="card modal">
+          <h2 id="completeTitle">Level Complete</h2>
+          <p id="completeMeta"></p>
+          <div id="completeBadges" class="badge-row"></div>
+          <div class="actions">
+            <button id="nextLevelBtn" class="btn primary">Next Level</button>
+            <button id="replayLevelBtn" class="btn">Replay</button>
+            <button id="completeMenuBtn" class="btn">Level Select</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
